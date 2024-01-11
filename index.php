@@ -13,11 +13,24 @@ header('Access-Control-Allow-Headers: *');
 include 'DBConnect.php';    //include the database connection file
 $objDb = new DBConnect();   //create a new object
 $conn = $objDb->connect();  //call the connect function
-var_dump($conn);            //dump the connection object
+
+// Comment out the following line to avoid dumping the connection object to the response
+// var_dump($conn);
 
 $user = json_decode(file_get_contents('php://input'));     
 $method = $_SERVER['REQUEST_METHOD'];   //get the request method
 switch($method) {
+    case 'GET':
+        $sql = "SELECT * FROM users";
+        $stmt = $conn->prepare($sql);
+        $stmt->execute();
+        $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        // Send only the array of users in the response
+        echo json_encode($users);
+        break;
+    
+
     case 'POST':
         $sql ="INSERT INTO users(id, name, email, mobile, created_at) VALUES(null, :name, :email, :mobile, :created_at)";
         $stmt = $conn->prepare($sql);
@@ -34,6 +47,4 @@ switch($method) {
         echo json_encode($response);
         break;
 }
-
-
 ?>
